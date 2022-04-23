@@ -66,6 +66,11 @@ public class PlayerController : MonoBehaviour
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //CAMBIAR POR QUITAR VIDA HASTA QUE QUEDE EN 0, ENTONCES SI RECARGO ESCENA
         }
+
+        if (other.gameObject.tag == "WinGem") //VICTORIA
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //MOSTRAR VICTORIA
+        }
     }
 
     void Update()
