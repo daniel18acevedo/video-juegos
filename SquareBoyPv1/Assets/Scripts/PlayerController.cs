@@ -16,6 +16,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask floor;
     public float fallMultiplier = 2.5f;
 
+    public int currentHealth;
+    public HealthBar healthBar;
+
     private void Awake()
     {
         playerActionControls = new PlayerActionControls();
@@ -36,11 +39,12 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         playerActionControls.Land.Jump.performed += _ => Jump();
+        currentHealth = 3;
+        healthBar.SetMaxHealth(currentHealth);
     }
 
     private void Jump()
     {
-
         if (IsGrounded())
         {
             rb2D.AddForce(new Vector2(0, jumpSpeed), ForceMode2D.Impulse);
@@ -62,9 +66,15 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.gameObject.tag == "Enemy")
+        if (other.gameObject.tag == "Enemy" || other.gameObject.tag == "EnemyVoid")
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //CAMBIAR POR QUITAR VIDA HASTA QUE QUEDE EN 0, ENTONCES SI RECARGO ESCENA
+            currentHealth -= 1;
+            healthBar.SetHealth(currentHealth);
+
+            if (currentHealth == 0 || other.gameObject.tag == "EnemyVoid")
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //CAMBIAR POR QUITAR VIDA HASTA QUE QUEDE EN 0, ENTONCES SI RECARGO ESCENA
+            }
         }
 
         if (other.gameObject.tag == "WinGem") //VICTORIA
