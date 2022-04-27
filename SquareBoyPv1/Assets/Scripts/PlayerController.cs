@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class PlayerController : MonoBehaviour
 
     public int currentHealth;
     public HealthBar healthBar;
+
+    public CountDownController countDown;
 
     private void Awake()
     {
@@ -41,6 +44,7 @@ public class PlayerController : MonoBehaviour
         playerActionControls.Land.Jump.performed += _ => Jump();
         currentHealth = 3;
         healthBar.SetMaxHealth(currentHealth);
+        countDown.ResetTime();
     }
 
     private void Jump()
@@ -95,6 +99,8 @@ public class PlayerController : MonoBehaviour
         Vector3 currentPosition = transform.position;
         currentPosition.x += movementInput * speed * Time.deltaTime;
         transform.position = currentPosition;
+
+        countDown.IncreaseCountDown();
     }
 
 }
