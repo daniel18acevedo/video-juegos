@@ -73,13 +73,13 @@ public class PlayerController : MonoBehaviour
 
             if (currentHealth == 0 || other.gameObject.tag == "EnemyVoid")
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //CAMBIAR POR QUITAR VIDA HASTA QUE QUEDE EN 0, ENTONCES SI RECARGO ESCENA
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1); //CAMBIAR POR QUITAR VIDA HASTA QUE QUEDE EN 0, ENTONCES SI RECARGO ESCENA
             }
         }
 
         if (other.gameObject.tag == "WinGem") //VICTORIA
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); //MOSTRAR VICTORIA
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1); //MOSTRAR VICTORIA
         }
     }
 
