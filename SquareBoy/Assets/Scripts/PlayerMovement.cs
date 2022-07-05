@@ -4,17 +4,40 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+
+    [Header("For Movement")]
+    [SerializeField] private float _moveSpeed = 7f;
+    private float _directionX;
+    private bool _facingRight = true;
+    private bool _isMoving;
+
+    [Header("For Jumping")]
+    [SerializeField] private LayerMask _jumpableGround;
+    [SerializeField] private float _jumpForce = 14f;
+    private float _airMoveSpeed = 7f;
+    private bool _grounded;
+    private bool _isJumping;
+    private bool _isFalling = true;
+    private bool _canJump;
+
+    [Header("Wall")]
+    [SerializeField] private LayerMask _jumpableWall;
+    private float _wallSlideSpeed;
+    private bool _isTouchingWall;
+    private bool _isWallSliding;
+
+    [Header("For WallJumping")]
+    [SerializeField] float _walljumpforce = 14f;
+    Vector2 _walljumpAngle = new(1, 1);
+    [SerializeField] float _walljumpDirection = -1;
+
+
+    [Header("Other")]
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
     private SpriteRenderer _playerSpriteRenderer;
     private BoxCollider2D _playerCollider;
-
-    [SerializeField] private LayerMask _jumpableGround;
-
-    private float _directionX;
-    [SerializeField] private float _moveSpeed = 7f;
-    [SerializeField] private float _jumpForce = 14f;
-
+    [SerializeField] private AudioSource _jumpSoundEffect;
 
     private enum MovementState
     {
@@ -22,11 +45,10 @@ public class PlayerMovement : MonoBehaviour
         Running,
         Jumping,
         Falling,
+        Sliding
     }
 
-    [SerializeField] private AudioSource _jumpSoundEffect;
 
-    // Start is called before the first frame update
     private void Start()
     {
         this._playerRigidBody = GetComponent<Rigidbody2D>();
@@ -40,61 +62,162 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        this.Inputs();
+        this.CheckWorld();
+        this.AnimationControl();
+    }
+
+    private void Inputs()
+    {
         this._directionX = Input.GetAxisRaw("Horizontal");
 
-        this.UpdateVelocityState();
-
-        this.UpdateAnimationState();
+        if (Input.GetButtonDown("Jump") && (this._grounded || this._isWallSliding))
+        {
+            this._canJump = true;
+        }
     }
 
-    private void UpdateVelocityState()
+    private void CheckWorld()
     {
-        //When player is dead
-        if (this._playerRigidBody.bodyType != RigidbodyType2D.Static)
-        {
-            this._playerRigidBody.velocity = new Vector2(this._directionX * this._moveSpeed, this._playerRigidBody.velocity.y);
+        this._grounded = Physics2D.BoxCast(this._playerCollider.bounds.center, this._playerCollider.bounds.size, 0f, Vector2.down, .1f, this._jumpableGround);
 
-            if (Input.GetButtonDown("Jump") && this.IsPlayerInGround())
+        if (this._grounded)
+        {
+            this._isFalling = false;
+            this._isJumping = false;
+        }
+        else if (!this._isTouchingWall)
+        {
+            if (this._playerRigidBody.velocity.y > .1f)
             {
-                this._playerRigidBody.velocity = new Vector2(this._playerRigidBody.velocity.x, this._jumpForce);
-                this._jumpSoundEffect.Play();
+                this._isFalling = false;
+                this._isJumping = true;
+            }
+            else if (this._playerRigidBody.velocity.y < -.1f)
+            {
+                this._isJumping = false;
+                this._isFalling = true;
             }
         }
+
+        this._isTouchingWall = Physics2D.BoxCast(this._playerCollider.bounds.center, this._playerCollider.bounds.size, 0f, this._facingRight ? Vector2.right : Vector2.left, .1f, this._jumpableWall);
     }
 
-    private void UpdateAnimationState()
+    private void AnimationControl()
     {
-        MovementState state;
+        var state = MovementState.Idle;
 
-        if (this._directionX > 0f)
-        {
-            state = MovementState.Running;
-            this._playerSpriteRenderer.flipX = false;
-        }
-        else if (this._directionX < 0f)
-        {
-            state = MovementState.Running;
-            this._playerSpriteRenderer.flipX = true;
-        }
-        else
+        if (this._grounded)
         {
             state = MovementState.Idle;
         }
 
-        if (this._playerRigidBody.velocity.y > .1f)
+        if (this._isMoving)
+        {
+            state = MovementState.Running;
+        }
+
+        if (this._isJumping)
         {
             state = MovementState.Jumping;
         }
-        else if (this._playerRigidBody.velocity.y < -.1f)
+
+        if (this._isFalling)
         {
             state = MovementState.Falling;
+        }
+
+        if (this._isWallSliding)
+        {
+            state = MovementState.Sliding;
+        }
+
+        if (this._isMoving && this._isTouchingWall && this._grounded)
+        {
+            state = MovementState.Idle;
         }
 
         this._playerAnimator.SetInteger("state", (int)state);
     }
 
-    private bool IsPlayerInGround()
+    private void FixedUpdate()
     {
-        return Physics2D.BoxCast(this._playerCollider.bounds.center, this._playerCollider.bounds.size, 0f, Vector2.down, .1f, this._jumpableGround);
+        var isPlayerAlived = this._playerRigidBody.bodyType != RigidbodyType2D.Static;
+
+        if (isPlayerAlived)
+        {
+            this.Movement();
+            this.Jump();
+            this.WallSlide();
+            this.WallJump();
+        }
+    }
+
+    private void Movement()
+    {
+        //for Animation
+        this._isMoving = this._directionX != 0;
+
+        //For movement
+        this._playerRigidBody.velocity = new Vector2(this._directionX * this._moveSpeed, this._playerRigidBody.velocity.y);
+
+        //For fliping
+        if (this._directionX < 0f && this._facingRight)
+        {
+            this.Flip();
+        }
+        else if (this._directionX > 0f && !this._facingRight)
+        {
+            this.Flip();
+        }
+    }
+
+    private void Flip()
+    {
+        if (!this._isWallSliding)
+        {
+            this._walljumpDirection *= -1;
+            this._facingRight = !this._facingRight;
+            this._playerSpriteRenderer.flipX = !this._facingRight;
+        }
+    }
+
+    private void Jump()
+    {
+        if (this._canJump && this._grounded)
+        {
+            this._playerRigidBody.velocity = new Vector2(this._playerRigidBody.velocity.x, this._jumpForce);
+            this._jumpSoundEffect.Play();
+            this._canJump = false;
+        }
+    }
+
+    private void WallSlide()
+    {
+        if (this._isTouchingWall && !this._grounded && this._playerRigidBody.velocity.y != .1f)
+        {
+            this._isWallSliding = true;
+        }
+        else
+        {
+            this._isWallSliding = false;
+        }
+
+        if (this._isWallSliding)
+        {
+            this._playerRigidBody.velocity = new Vector2(this._playerRigidBody.velocity.x, -this._wallSlideSpeed);
+        }
+    }
+
+    void WallJump()
+    {
+        if (this._canJump && this._isWallSliding)
+        {
+            this._playerRigidBody.AddForce(new Vector2(this._walljumpforce * this._walljumpAngle.x * this._walljumpDirection, this._walljumpforce * this._walljumpAngle.y), ForceMode2D.Impulse);
+            this._jumpSoundEffect.Play();
+            this._canJump = false;
+            this._isWallSliding = false;
+            this.Flip();
+        }
     }
 }
