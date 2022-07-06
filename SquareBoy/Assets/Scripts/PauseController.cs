@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class PauseController : MonoBehaviour
 {
+    [Header("Pause")]
     [SerializeField] private GameObject _pauseButton;
     [SerializeField] private GameObject _pauseMenu;
     private bool _gameInPause;
@@ -50,6 +52,13 @@ public class PauseController : MonoBehaviour
         this._gameInPause = false;
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void MainMenu()
+    {
+        this._gameInPause = false;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene((int)Scenes.StartMenu);
     }
 
     public void Quit()
