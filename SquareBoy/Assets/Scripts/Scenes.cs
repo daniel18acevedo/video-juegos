@@ -9,11 +9,10 @@ namespace Assets.Scripts
     internal enum Scenes
     {
         StartMenu=0,
-        Level1=1,
-        Level2=2,
-        GameOverMenu=3,
-        PauseMenu=11,
-        SettingsMenu=4,
-        WinnerMenu=22
+        SettingsMenu=3,
+        ControlsMenu=5,
+        CreditsMenu=6,
+        GameOverMenu=4,
+        WinnerMenu=7
     }
 }

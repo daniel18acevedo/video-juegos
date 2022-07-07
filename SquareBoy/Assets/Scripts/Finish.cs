@@ -1,5 +1,8 @@
+using Assets.Scripts;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -25,6 +28,18 @@ public class Finish : MonoBehaviour
 
     private void CompleteLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        var indexCurrentLevel = SceneManager.GetActiveScene().buildIndex;
+        
+        var sceneToLoad = (int)Scenes.WinnerMenu;
+        
+        if(indexCurrentLevel != (int)Levels.Level2)
+        {
+            var levels = Enum.GetValues(typeof(Levels)).Cast<Levels>();
+            var nextLevel = levels.First(level => (indexCurrentLevel+1) == (int)level);
+
+            sceneToLoad= (int)nextLevel;
+        }
+        
+        SceneManager.LoadScene(sceneToLoad);
     }
 }
