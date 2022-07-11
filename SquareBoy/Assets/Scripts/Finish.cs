@@ -8,6 +8,9 @@ using UnityEngine.SceneManagement;
 
 public class Finish : MonoBehaviour
 {
+    [Header("Player")]
+    [SerializeField] private GameObject _player;
+
     private AudioSource _finishSoundEffect;
     private bool _levelCompleted = false;
 
@@ -22,6 +25,8 @@ public class Finish : MonoBehaviour
         {
             this._finishSoundEffect.Play();
             this._levelCompleted = true;
+            this._player.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+            this._player.GetComponent<Animator>().SetTrigger("finish");
             base.Invoke(nameof(this.CompleteLevel), 2f);
         }
     }

@@ -1,7 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+public enum MovementState
+{
+    Idle,
+    Running,
+    Jumping,
+    Falling,
+    Sliding
+}
 public class PlayerMovement : MonoBehaviour
 {
 
@@ -39,16 +46,7 @@ public class PlayerMovement : MonoBehaviour
     private BoxCollider2D _playerCollider;
     [SerializeField] private AudioSource _jumpSoundEffect;
 
-    private enum MovementState
-    {
-        Idle,
-        Running,
-        Jumping,
-        Falling,
-        Sliding
-    }
-
-
+    
     private void Start()
     {
         this._playerRigidBody = GetComponent<Rigidbody2D>();
