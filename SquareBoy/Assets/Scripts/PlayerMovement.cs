@@ -7,7 +7,8 @@ public enum MovementState
     Running,
     Jumping,
     Falling,
-    Sliding
+    Sliding,
+    Pushed
 }
 public class PlayerMovement : MonoBehaviour
 {
@@ -21,7 +22,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("For Jumping")]
     [SerializeField] private LayerMask _jumpableGround;
     [SerializeField] private float _jumpForce = 14f;
-    private float _airMoveSpeed = 7f;
     private bool _grounded;
     private bool _isJumping;
     private bool _isFalling = true;
@@ -38,15 +38,21 @@ public class PlayerMovement : MonoBehaviour
     Vector2 _walljumpAngle = new(1, 1);
     [SerializeField] float _walljumpDirection = -1;
 
+    [Header("For pushed")]
+    [SerializeField] private float _forcePushedY = 3f;
+    [SerializeField] private float _forcePushedX = 7f;
+    private bool _isPushed;
+
+    private bool _isAboveEnemy;
 
     [Header("Other")]
+    [SerializeField] private AudioSource _jumpSoundEffect;
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
     private SpriteRenderer _playerSpriteRenderer;
     private BoxCollider2D _playerCollider;
-    [SerializeField] private AudioSource _jumpSoundEffect;
 
-    
+
     private void Start()
     {
         this._playerRigidBody = GetComponent<Rigidbody2D>();
@@ -99,6 +105,11 @@ public class PlayerMovement : MonoBehaviour
         }
 
         this._isTouchingWall = Physics2D.BoxCast(this._playerCollider.bounds.center, this._playerCollider.bounds.size, 0f, this._facingRight ? Vector2.right : Vector2.left, .1f, this._jumpableWall);
+    
+        if(this._grounded || this._isFalling || this._isJumping || this._isTouchingWall)
+        {
+            this._isAboveEnemy = false;
+        }
     }
 
     private void AnimationControl()
@@ -135,6 +146,11 @@ public class PlayerMovement : MonoBehaviour
             state = MovementState.Idle;
         }
 
+        if (this._isPushed)
+        {
+            state = MovementState.Pushed;
+        }
+
         this._playerAnimator.SetInteger("state", (int)state);
     }
 
@@ -142,7 +158,7 @@ public class PlayerMovement : MonoBehaviour
     {
         var isPlayerAlived = this._playerRigidBody.bodyType != RigidbodyType2D.Static;
 
-        if (isPlayerAlived)
+        if (isPlayerAlived && !this._isPushed && !this._isAboveEnemy)
         {
             this.Movement();
             this.Jump();
@@ -216,6 +232,34 @@ public class PlayerMovement : MonoBehaviour
             this._canJump = false;
             this._isWallSliding = false;
             this.Flip();
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy") && !this._isAboveEnemy)
+        {
+            this._isPushed = true;
+
+            var directionOfPush = this._facingRight ? (this._forcePushedX * -1) : this._forcePushedX;
+
+            this._playerRigidBody.AddForce(new Vector2(directionOfPush, this._forcePushedY), ForceMode2D.Impulse);
+        }
+    }
+
+    public void FinishPushed()
+    {
+        this._isPushed = false;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            var directionOfPush = this._facingRight ? this._forcePushedX: (this._forcePushedX * -1);
+
+            this._playerRigidBody.AddForce(new Vector2(directionOfPush, 10), ForceMode2D.Impulse);
+            this._isAboveEnemy = true;
         }
     }
 }

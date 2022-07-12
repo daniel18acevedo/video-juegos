@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Melon
   - Trap
+  - Enemy
   layers:
   - Default
   - TransparentFX
