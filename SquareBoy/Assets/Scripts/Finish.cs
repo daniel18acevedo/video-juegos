@@ -27,11 +27,21 @@ public class Finish : MonoBehaviour
             this._levelCompleted = true;
             this._player.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             this._player.GetComponent<Animator>().SetTrigger("finish");
-            base.Invoke(nameof(this.CompleteLevel), 2f);
+
+            this.UpdateMelons();
+            
+            base.Invoke(nameof(this.NextLevel), 2f);
         }
     }
 
-    private void CompleteLevel()
+    public void UpdateMelons()
+    {
+        var currentMelons = ItemCollector.Melons;
+
+        PlayerStats.AddMelons(currentMelons);
+    }
+
+    private void NextLevel()
     {
         var indexCurrentLevel = SceneManager.GetActiveScene().buildIndex;
         

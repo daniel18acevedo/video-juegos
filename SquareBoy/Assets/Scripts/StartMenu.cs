@@ -6,8 +6,14 @@ using UnityEngine.SceneManagement;
 
 public class StartMenu : MonoBehaviour
 {
+    public void Start()
+    {
+        var audioVolume = PlayerPrefs.GetFloat("audioVolume", 0.5f);
+        AudioListener.volume = audioVolume;
+    }
     public void StartGame()
     {
+        PlayerStats.ResetStats();
         SceneManager.LoadScene((int)Levels.Level1);
     }
 
@@ -19,6 +25,11 @@ public class StartMenu : MonoBehaviour
     public void SettingsMenu()
     {
         SceneManager.LoadScene((int)Scenes.SettingsMenu);
+    }
+
+    public void CreditsMenu()
+    {
+        SceneManager.LoadScene((int)Scenes.CreditsMenu);
     }
 
     public void QuitGame()

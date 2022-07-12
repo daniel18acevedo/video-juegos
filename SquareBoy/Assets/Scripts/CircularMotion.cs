@@ -27,13 +27,6 @@ public class CircularMotion : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*Debug.Log(Vector2.Distance(base.transform.position, this._rightWayPoint));
-        if (Vector2.Distance(base.transform.position, this._rightWayPoint) < 12.82f
-            || Vector2.Distance(base.transform.position, this._leftWayPoint) < 12.82f)
-        {
-            this._speed *= -1;
-        }*/
-
         base.transform.RotateAround(this._center.transform.position, new Vector3(0, 0, this._radius), this._speed * Time.deltaTime);
     }
 

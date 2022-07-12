@@ -14,6 +14,8 @@ public class EnemyPatroll : WaypointFollower
     [SerializeField] private BoxCollider2D _enemyBodyCollider;
     [SerializeField] private BoxCollider2D _enemyHeaderCollider;
 
+    [SerializeField]private AudioSource _enemyDeathAudioSource;
+
     private Animator _enemyAnimator;
     private SpriteRenderer _enemySpritRenderer;
     private bool _facingRight;
@@ -21,6 +23,7 @@ public class EnemyPatroll : WaypointFollower
 
     protected override void Start()
     {
+        this._enemyDeathAudioSource = GetComponent<AudioSource>();
         this._enemySpritRenderer = base.GetComponent<SpriteRenderer>();
         this._enemyAnimator = base.GetComponent<Animator>();
     }
@@ -47,6 +50,7 @@ public class EnemyPatroll : WaypointFollower
         {
             this._enemyAlive = false;
             this._enemyAnimator.SetTrigger("death");
+            this._enemyDeathAudioSource.Play();
         }
     }
 

@@ -51,6 +51,7 @@ public class PauseController : MonoBehaviour
     {
         this._gameInPause = false;
         Time.timeScale = 1f;
+        PlayerStats.ResetLifes();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

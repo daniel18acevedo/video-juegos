@@ -41,6 +41,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("For pushed")]
     [SerializeField] private float _forcePushedY = 3f;
     [SerializeField] private float _forcePushedX = 7f;
+    [SerializeField] private AudioSource _pushedSoundEffect;
     private bool _isPushed;
 
     private bool _isAboveEnemy;
@@ -240,7 +241,7 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Enemy") && !this._isAboveEnemy)
         {
             this._isPushed = true;
-
+            this._pushedSoundEffect.Play();
             var directionOfPush = this._facingRight ? (this._forcePushedX * -1) : this._forcePushedX;
 
             this._playerRigidBody.AddForce(new Vector2(directionOfPush, this._forcePushedY), ForceMode2D.Impulse);
